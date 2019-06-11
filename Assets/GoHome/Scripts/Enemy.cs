@@ -5,14 +5,20 @@ using UnityEngine.AI;
 
 public class Enemy : MonoBehaviour
 {
+    public enum State
+    {
+        Patrol,
+        Seek
+    }
+    public State currentState;
     public Transform waypointParent;
     public float moveSpeed = 2f;
     public float stoppingDistance = 1f;
 
     private Transform[] waypoints;
     private int currentIndex = 1;
-
     private NavMeshAgent agent;
+    private Transform target;
 
     // Use this for initialization
     void Start()
@@ -22,13 +28,26 @@ public class Enemy : MonoBehaviour
 
         // Get the AI component
         agent = GetComponent<NavMeshAgent>();
+        // Just in case make state Patrol
+        currentState = State.Patrol;
     }
 
     // Update is called once per frame
     void Update()
     {
         // Run Patrol Every Frame
-        Patrol();
+        switch (currentState)
+        {
+            case State.Patrol:
+                Patrol();
+                break;
+            case State.Seek:
+                Seek();
+                break;
+            default:
+                break;
+        }
+        //Patrol();
     }
 
     void OnDrawGizmosSelected()
@@ -54,7 +73,7 @@ public class Enemy : MonoBehaviour
 
         // 2 - Get distance from waypoint
         float distance = Vector3.Distance(transform.position, point.position);
-        
+
         // 3 - If distance is less than stopping distance
         if (distance < stoppingDistance)
         {
@@ -74,5 +93,29 @@ public class Enemy : MonoBehaviour
 
         // 5 - Use NavMeshAgent to follow the current waypoint
         agent.SetDestination(point.position);
+    }
+    void Seek()
+    {
+        //Get Enemy to follow target
+        agent.SetDestination(target.position);
+    }
+    private void OnTriggerEnter (Collider other)
+    {
+        if (other.gameObject.CompareTag("Player"))
+        {
+            // Set target to the thing in our zone
+            target = other.transform;
+            // Switch state to seek
+            currentState = State.Seek;
+        }
+    }
+    private void OnTriggerExit(Collider other)
+    {
+        if(other.gameObject.CompareTag("Player"))
+        {
+            // Switch state back to patrol as we lost our dude
+            currentState = State.Patrol;
+        }
+
     }
 }

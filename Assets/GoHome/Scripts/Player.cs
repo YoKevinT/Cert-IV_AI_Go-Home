@@ -2,18 +2,25 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+[RequireComponent(typeof(Rigidbody))]
 public class Player : MonoBehaviour
 {
-
-    // Use this for initialization
+    public float movementSpeed = 20f;
+    private Rigidbody rigid;
     void Start()
     {
-        // This is the start of the game
+        // Get reference to rigidboy
+        rigid = GetComponent<Rigidbody>();
     }
 
-    // Update is called once per frame
     void Update()
     {
-        // This is during the game
+        // Get Input Axis as float for x and y
+        float inputX = Input.GetAxis("Horizontal");
+        float inputZ = Input.GetAxis("Vertical");
+        // Create Input Vector
+        Vector3 input = new Vector3(inputX, 0, inputZ);
+        // Apply velocity
+        rigid.velocity = input * movementSpeed;
     }
 }
